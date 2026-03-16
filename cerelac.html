@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Erha Pit Runner</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body{
+      background:linear-gradient(to bottom, #b9e6ff, #f8fcff);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:10px;
+      color:#222;
+    }
+
+    .game-wrapper{
+      width:100%;
+      max-width:980px;
+      text-align:center;
+    }
+
+    h1{
+      font-size:30px;
+      margin-bottom:8px;
+    }
+
+    .info{
+      color:#444;
+      line-height:1.6;
+      margin-bottom:14px;
+      font-size:15px;
+    }
+
+    .score-board{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .score-card{
+      background:#fff;
+      border:2px solid #222;
+      border-radius:14px;
+      padding:10px 16px;
+      min-width:120px;
+      box-shadow:0 6px 16px rgba(0,0,0,0.08);
+      font-weight:700;
+    }
+
+    .game{
+      position:relative;
+      width:100%;
+      height:420px;
+      background:linear-gradient(to top, #dff8d0 0 29%, #8ed5ff 29% 100%);
+      border:3px solid #222;
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 14px 35px rgba(0,0,0,0.12);
+      touch-action:manipulation;
+    }
+
+    .sun{
+      position:absolute;
+      top:24px;
+      right:52px;
+      width:64px;
+      height:64px;
+      background:#ffd84c;
+      border-radius:50%;
+      box-shadow:0 0 30px rgba(255,216,76,0.7);
+    }
+
+    .cloud{
+      position:absolute;
+      background:#fff;
+      border-radius:40px;
+      opacity:0.95;
+    }
+
+    .cloud::before,
+    .cloud::after{
+      content:"";
+      position:absolute;
+      background:#fff;
+      border-radius:50%;
+    }
+
+    .cloud1{
+      width:94px;
+      height:30px;
+      top:58px;
+      left:100px;
+      animation:cloudMove 20s linear infinite;
+    }
+
+    .cloud1::before{
+      width:38px;
+      height:38px;
+      left:10px;
+      top:-16px;
+    }
+
+    .cloud1::after{
+      width:46px;
+      height:46px;
+      right:10px;
+      top:-20px;
+    }
+
+    .cloud2{
+      width:115px;
+      height:34px;
+      top:100px;
+      left:420px;
+      animation:cloudMove 25s linear infinite;
+    }
+
+    .cloud2::before{
+      width:42px;
+      height:42px;
+      left:18px;
+      top:-16px;
+    }
+
+    .cloud2::after{
+      width:50px;
+      height:50px;
+      right:15px;
+      top:-22px;
+    }
+
+    @keyframes cloudMove{
+      from{transform:translateX(0);}
+      to{transform:translateX(110px);}
+    }
+
+    .mountain{
+      position:absolute;
+      bottom:110px;
+      width:0;
+      height:0;
+      border-left:70px solid transparent;
+      border-right:70px solid transparent;
+      border-bottom:110px solid rgba(76, 136, 96, 0.35);
+    }
+
+    .m1{ left:120px; }
+    .m2{ left:280px; border-left-width:90px; border-right-width:90px; border-bottom-width:135px; }
+    .m3{ left:560px; border-left-width:80px; border-right-width:80px; border-bottom-width:120px; }
+
+    .ground{
+      position:absolute;
+      left:0;
+      bottom:0;
+      width:100%;
+      height:110px;
+      background:
+        repeating-linear-gradient(
+          to right,
+          #4a9d46 0 42px,
+          #58af52 42px 84px
+        );
+      border-top:3px solid #2d6d2b;
+    }
+
+    .player-wrap{
+      position:absolute;
+      left:90px;
+      bottom:110px;
+      width:60px;
+      height:95px;
+      z-index:12;
+    }
+
+    .name-tag{
+      text-align:center;
+      font-size:14px;
+      font-weight:700;
+      color:#111;
+      margin-bottom:3px;
+      text-shadow:0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .player{
+      width:52px;
+      height:72px;
+      margin:0 auto;
+    }
+
+    .player .head{
+      width:28px;
+      height:28px;
+      background:#ffd4b8;
+      border:2px solid #222;
+      border-radius:50%;
+      margin:0 auto;
+    }
+
+    .player .body{
+      width:26px;
+      height:26px;
+      background:#e84a8a;
+      border:2px solid #222;
+      border-radius:8px 8px 5px 5px;
+      margin:2px auto 0;
+    }
+
+    .player .legs{
+      display:flex;
+      justify-content:center;
+      gap:7px;
+      margin-top:2px;
+    }
+
+    .player .legs span{
+      width:7px;
+      height:14px;
+      background:#222;
+      border-radius:4px;
+      transform-origin:top center;
+    }
+
+    .player.running .legs span:first-child{
+      animation:runLeft 0.18s infinite alternate;
+    }
+
+    .player.running .legs span:last-child{
+      animation:runRight 0.18s infinite alternate;
+    }
+
+    @keyframes runLeft{
+      from{transform:rotate(18deg);}
+      to{transform:rotate(-18deg);}
+    }
+
+    @keyframes runRight{
+      from{transform:rotate(-18deg);}
+      to{transform:rotate(18deg);}
+    }
+
+    .player.jumping .legs span{
+      animation:none !important;
+    }
+
+    .pit{
+      position:absolute;
+      bottom:0;
+      height:110px;
+      background:#232323;
+      border-left:4px solid #111;
+      border-right:4px solid #111;
+      z-index:6;
+    }
+
+    .pit::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      width:100%;
+      height:12px;
+      background:#111;
+    }
+
+    .pit::after{
+      content:"";
+      position:absolute;
+      inset:16px 8px 10px 8px;
+      background:repeating-linear-gradient(
+        to bottom,
+        #333 0 10px,
+        #222 10px 20px
+      );
+      opacity:0.45;
+    }
+
+    .obstacle{
+      position:absolute;
+      bottom:110px;
+      z-index:8;
+    }
+
+    .rock{
+      width:34px;
+      height:26px;
+      background:#8a8a8a;
+      border:2px solid #333;
+      border-radius:16px 16px 12px 12px;
+      box-shadow:inset -6px -4px 0 rgba(0,0,0,0.12);
+      position:relative;
+    }
+
+    .rock::before,
+    .rock::after{
+      content:"";
+      position:absolute;
+      background:#9b9b9b;
+      border:2px solid #333;
+      border-radius:50%;
+    }
+
+    .rock::before{
+      width:14px;
+      height:12px;
+      left:-4px;
+      top:7px;
+    }
+
+    .rock::after{
+      width:16px;
+      height:14px;
+      right:-5px;
+      top:5px;
+    }
+
+    .crate{
+      width:34px;
+      height:34px;
+      background:#c98a43;
+      border:2px solid #5f3814;
+      box-shadow:inset 0 0 0 3px rgba(255,255,255,0.08);
+      position:relative;
+    }
+
+    .crate::before,
+    .crate::after{
+      content:"";
+      position:absolute;
+      background:#5f3814;
+    }
+
+    .crate::before{
+      width:2px;
+      height:100%;
+      left:50%;
+      top:0;
+      transform:translateX(-50%);
+    }
+
+    .crate::after{
+      height:2px;
+      width:100%;
+      left:0;
+      top:50%;
+      transform:translateY(-50%);
+    }
+
+    .spike{
+      width:38px;
+      height:28px;
+      background:transparent;
+      position:relative;
+    }
+
+    .spike::before{
+      content:"";
+      position:absolute;
+      left:0;
+      bottom:0;
+      width:0;
+      height:0;
+      border-left:9px solid transparent;
+      border-right:9px solid transparent;
+      border-bottom:28px solid #7f8c8d;
+    }
+
+    .spike::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      bottom:0;
+      width:0;
+      height:0;
+      border-left:9px solid transparent;
+      border-right:9px solid transparent;
+      border-bottom:28px solid #6b7778;
+      box-shadow:20px 0 0 0 #5f696a;
+    }
+
+    .overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.58);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:30;
+      padding:18px;
+    }
+
+    .overlay.show{
+      display:flex;
+    }
+
+    .message-box{
+      background:#fff;
+      width:100%;
+      max-width:430px;
+      border-radius:20px;
+      padding:26px;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,0.22);
+    }
+
+    .message-box h2{
+      font-size:32px;
+      margin-bottom:8px;
+    }
+
+    .message-box p{
+      color:#555;
+      line-height:1.6;
+      margin-bottom:16px;
+    }
+
+    .fail-text{
+      font-size:22px;
+      font-weight:800;
+      color:#111;
+      margin:10px 0 12px;
+    }
+
+    .emoji-line{
+      font-size:42px;
+      margin-bottom:14px;
+    }
+
+    .btn{
+      border:none;
+      background:#222;
+      color:#fff;
+      padding:14px 22px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .btn:hover{
+      opacity:0.93;
+    }
+
+    .mobile-controls{
+      display:none;
+      margin-top:14px;
+      justify-content:center;
+    }
+
+    .jump-btn{
+      width:100%;
+      max-width:260px;
+      padding:16px 18px;
+      font-size:20px;
+      font-weight:700;
+      border:none;
+      border-radius:16px;
+      background:#222;
+      color:#fff;
+      box-shadow:0 8px 18px rgba(0,0,0,0.14);
+      touch-action:manipulation;
+      cursor:pointer;
+    }
+
+    .jump-btn:active{
+      transform:scale(0.98);
+    }
+
+    @media (max-width:700px){
+      body{
+        padding:10px;
+        align-items:flex-start;
+      }
+
+      h1{
+        font-size:24px;
+      }
+
+      .info{
+        font-size:14px;
+      }
+
+      .game{
+        height:320px;
+        border-radius:18px;
+      }
+
+      .ground{
+        height:86px;
+      }
+
+      .pit{
+        height:86px;
+      }
+
+      .obstacle{
+        bottom:86px;
+      }
+
+      .player-wrap{
+        left:52px;
+        bottom:86px;
+        width:56px;
+        height:88px;
+      }
+
+      .player{
+        transform:scale(0.92);
+        transform-origin:top center;
+      }
+
+      .name-tag{
+        font-size:13px;
+      }
+
+      .mountain{
+        bottom:86px;
+      }
+
+      .m1{
+        left:60px;
+        border-left-width:45px;
+        border-right-width:45px;
+        border-bottom-width:70px;
+      }
+
+      .m2{
+        left:180px;
+        border-left-width:60px;
+        border-right-width:60px;
+        border-bottom-width:92px;
+      }
+
+      .m3{
+        left:310px;
+        border-left-width:55px;
+        border-right-width:55px;
+        border-bottom-width:82px;
+      }
+
+      .sun{
+        width:48px;
+        height:48px;
+        top:20px;
+        right:24px;
+      }
+
+      .cloud1{
+        left:30px;
+        top:46px;
+        transform:scale(0.8);
+      }
+
+      .cloud2{
+        left:180px;
+        top:82px;
+        transform:scale(0.75);
+      }
+
+      .mobile-controls{
+        display:flex;
+      }
+
+      .fail-text{
+        font-size:20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <h1>Erha Pit Runner</h1>
+    <p class="info">
+      Press <strong>Space</strong>, <strong>W</strong>, <strong>↑</strong>, or tap <strong>Jump</strong>.<br>
+      Pit sizes now vary, obstacles are added, and each cleared danger gives <strong>+2</strong>.
+    </p>
+
+    <div class="score-board">
+      <div class="score-card">Score: <span id="score">0</span></div>
+      <div class="score-card">Best: <span id="bestScore">0</span></div>
+      <div class="score-card">Jumps Left: <span id="jumpsLeft">2</span></div>
+    </div>
+
+    <div class="game" id="game">
+      <div class="sun"></div>
+      <div class="cloud cloud1"></div>
+      <div class="cloud cloud2"></div>
+
+      <div class="mountain m1"></div>
+      <div class="mountain m2"></div>
+      <div class="mountain m3"></div>
+
+      <div class="player-wrap" id="playerWrap">
+        <div class="name-tag">Erha</div>
+        <div class="player running" id="player">
+          <div class="head"></div>
+          <div class="body"></div>
+          <div class="legs">
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ground"></div>
+
+      <div class="overlay" id="gameOverOverlay">
+        <div class="message-box">
+          <h2>Game Over</h2>
+          <p>Erha failed the run.<br>Final score: <strong id="finalScore">0</strong></p>
+          <div class="fail-text">No cerelac for you</div>
+          <div class="emoji-line">🤣😭</div>
+          <button class="btn" id="restartBtn">Restart Game</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-controls">
+      <button class="jump-btn" id="jumpBtn">JUMP</button>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const playerWrap = document.getElementById("playerWrap");
+    const player = document.getElementById("player");
+    const scoreEl = document.getElementById("score");
+    const bestScoreEl = document.getElementById("bestScore");
+    const jumpsLeftEl = document.getElementById("jumpsLeft");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const finalScoreEl = document.getElementById("finalScore");
+    const restartBtn = document.getElementById("restartBtn");
+    const jumpBtn = document.getElementById("jumpBtn");
+
+    let groundHeight = window.innerWidth <= 700 ? 86 : 110;
+
+    let playerBottom = groundHeight;
+    let velocityY = 0;
+    let gravity = 0.78;
+    let jumpForce = 14.8;
+    let maxJumps = 2;
+    let jumpsUsed = 0;
+
+    let isGameOver = false;
+    let score = 0;
+    let bestScore = 0;
+
+    let pits = [];
+    let obstacles = [];
+    let scrollSpeed = 6.2;
+    let spawnTimer = 0;
+    let nextSpawn = randomSpawnFrames();
+    let frameCount = 0;
+
+    function updateGroundHeight() {
+      groundHeight = window.innerWidth <= 700 ? 86 : 110;
+    }
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function randomSpawnFrames() {
+      return window.innerWidth <= 700
+        ? Math.floor(randomBetween(58, 105))
+        : Math.floor(randomBetween(68, 120));
+    }
+
+    function randomPitWidth() {
+      return window.innerWidth <= 700
+        ? Math.floor(randomBetween(50, 140))
+        : Math.floor(randomBetween(65, 190));
+    }
+
+    function setPlayerBottom() {
+      playerWrap.style.bottom = playerBottom + "px";
+    }
+
+    function updateJumpText() {
+      jumpsLeftEl.textContent = String(maxJumps - jumpsUsed);
+    }
+
+    function jump() {
+      if (isGameOver) return;
+
+      if (jumpsUsed < maxJumps) {
+        velocityY = jumpsUsed === 0 ? jumpForce : jumpForce - 1.2;
+        jumpsUsed++;
+        updateJumpText();
+      }
+    }
+
+    function createPit() {
+      const pit = document.createElement("div");
+      const width = randomPitWidth();
+
+      pit.className = "pit";
+      pit.style.width = width + "px";
+      pit.style.left = game.clientWidth + "px";
+
+      game.appendChild(pit);
+
+      pits.push({
+        el: pit,
+        x: game.clientWidth,
+        width,
+        scored: false
+      });
+    }
+
+    function createObstacle() {
+      const obstacle = document.createElement("div");
+      obstacle.className = "obstacle";
+
+      const types = [
+        { name: "rock", width: 34, height: 26 },
+        { name: "crate", width: 34, height: 34 },
+        { name: "spike", width: 38, height: 28 }
+      ];
+
+      const picked = types[Math.floor(Math.random() * types.length)];
+      const shape = document.createElement("div");
+      shape.className = picked.name;
+
+      obstacle.appendChild(shape);
+      obstacle.style.left = game.clientWidth + "px";
+
+      game.appendChild(obstacle);
+
+      obstacles.push({
+        el: obstacle,
+        x: game.clientWidth,
+        width: picked.width,
+        height: picked.height,
+        scored: false
+      });
+    }
+
+    function spawnChallenge() {
+      const roll = Math.random();
+
+      if (roll < 0.42) {
+        createPit();
+      } else if (roll < 0.84) {
+        createObstacle();
+      } else {
+        createPit();
+        setTimeout(() => {
+          if (!isGameOver) createObstacle();
+        }, 280);
+      }
+    }
+
+    function updatePlayer() {
+      velocityY -= gravity;
+      playerBottom += velocityY;
+
+      if (playerBottom <= groundHeight) {
+        playerBottom = groundHeight;
+        velocityY = 0;
+        jumpsUsed = 0;
+        updateJumpText();
+        player.classList.remove("jumping");
+        player.classList.add("running");
+      } else {
+        player.classList.add("jumping");
+        player.classList.remove("running");
+      }
+
+      setPlayerBottom();
+    }
+
+    function updatePits() {
+      const playerLeft = playerWrap.offsetLeft;
+      const playerWidth = playerWrap.offsetWidth;
+      const playerCenter = playerLeft + playerWidth / 2;
+
+      for (let i = pits.length - 1; i >= 0; i--) {
+        const pitObj = pits[i];
+        pitObj.x -= scrollSpeed;
+        pitObj.el.style.left = pitObj.x + "px";
+
+        const pitLeft = pitObj.x;
+        const pitRight = pitObj.x + pitObj.width;
+
+        if (!pitObj.scored && pitRight < playerLeft) {
+          score += 2;
+          pitObj.scored = true;
+          scoreEl.textContent = score;
+        }
+
+        const overPit = playerCenter > pitLeft && playerCenter < pitRight;
+        const onGround = playerBottom <= groundHeight + 1;
+
+        if (overPit && onGround) {
+          endGame();
+          return;
+        }
+
+        if (pitObj.x + pitObj.width < -30) {
+          pitObj.el.remove();
+          pits.splice(i, 1);
+        }
+      }
+    }
+
+    function updateObstacles() {
+      const playerLeft = playerWrap.offsetLeft + 8;
+      const playerWidth = playerWrap.offsetWidth - 16;
+      const playerRight = playerLeft + playerWidth;
+      const playerTop = playerBottom + 72;
+      const playerBottomHit = playerBottom;
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obj = obstacles[i];
+        obj.x -= scrollSpeed;
+        obj.el.style.left = obj.x + "px";
+
+        const objLeft = obj.x;
+        const objRight = obj.x + obj.width;
+        const objBottom = groundHeight;
+        const objTop = groundHeight + obj.height;
+
+        if (!obj.scored && objRight < playerLeft) {
+          score += 2;
+          obj.scored = true;
+          scoreEl.textContent = score;
+        }
+
+        const horizontalHit = playerRight > objLeft && playerLeft < objRight;
+        const verticalHit = playerTop > objBottom && playerBottomHit < objTop;
+
+        if (horizontalHit && verticalHit) {
+          endGame();
+          return;
+        }
+
+        if (obj.x + obj.width < -40) {
+          obj.el.remove();
+          obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    function increaseDifficulty() {
+      if (frameCount % 220 === 0 && scrollSpeed < 13) {
+        scrollSpeed += 0.24;
+      }
+
+      if (score > 0 && score % 16 === 0) {
+        gravity = Math.min(0.95, gravity + 0.001);
+      }
+    }
+
+    function endGame() {
+      isGameOver = true;
+      finalScoreEl.textContent = score;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestScoreEl.textContent = bestScore;
+      }
+
+      gameOverOverlay.classList.add("show");
+      player.classList.remove("running");
+      player.classList.remove("jumping");
+    }
+
+    function clearChallenges() {
+      pits.forEach(p => p.el.remove());
+      obstacles.forEach(o => o.el.remove());
+      pits = [];
+      obstacles = [];
+    }
+
+    function resetGame() {
+      updateGroundHeight();
+
+      isGameOver = false;
+      score = 0;
+      scoreEl.textContent = "0";
+
+      gravity = 0.78;
+      jumpForce = 14.8;
+      scrollSpeed = 6.2;
+      spawnTimer = 0;
+      nextSpawn = randomSpawnFrames();
+      frameCount = 0;
+
+      playerBottom = groundHeight;
+      velocityY = 0;
+      jumpsUsed = 0;
+      updateJumpText();
+      setPlayerBottom();
+
+      clearChallenges();
+
+      gameOverOverlay.classList.remove("show");
+      player.classList.add("running");
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function gameLoop() {
+      if (isGameOver) return;
+
+      frameCount++;
+      spawnTimer++;
+
+      if (spawnTimer >= nextSpawn) {
+        spawnChallenge();
+        spawnTimer = 0;
+        nextSpawn = randomSpawnFrames();
+      }
+
+      updatePlayer();
+      updatePits();
+      updateObstacles();
+      increaseDifficulty();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function handleJumpInput(e) {
+      if (e) e.preventDefault();
+      jump();
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
+        handleJumpInput(e);
+      }
+    });
+
+    jumpBtn.addEventListener("click", handleJumpInput);
+    jumpBtn.addEventListener("touchstart", handleJumpInput, { passive: false });
+
+    game.addEventListener("click", function(e) {
+      if (e.target === game) jump();
+    });
+
+    game.addEventListener("touchstart", function(e) {
+      if (e.target === game) {
+        e.preventDefault();
+        jump();
+      }
+    }, { passive: false });
+
+    restartBtn.addEventListener("click", resetGame);
+
+    window.addEventListener("resize", () => {
+      updateGroundHeight();
+    });
+
+    updateJumpText();
+    setPlayerBottom();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

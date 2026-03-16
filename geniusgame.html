@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Erha's Choice Game</title>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <title>Trick Question Game</title>
   <style>
     *{
       margin:0;
@@ -14,23 +13,22 @@
     }
 
     body{
-      background:linear-gradient(135deg, #fff8fb, #f2f6ff);
-      color:#222;
       min-height:100vh;
+      background:linear-gradient(135deg, #fff7fb, #eef4ff);
       display:flex;
       justify-content:center;
       align-items:center;
       padding:20px;
+      color:#222;
     }
 
-    .game-container{
+    .game-box{
       width:100%;
       max-width:760px;
       background:#fff;
       border-radius:24px;
-      box-shadow:0 16px 40px rgba(0,0,0,0.08);
       padding:28px;
-      overflow:hidden;
+      box-shadow:0 14px 40px rgba(0,0,0,0.08);
     }
 
     h1{
@@ -43,21 +41,21 @@
       text-align:center;
       color:#666;
       margin-bottom:24px;
-      font-size:15px;
       line-height:1.6;
     }
 
     .progress{
       font-size:14px;
-      color:#888;
-      margin-bottom:18px;
+      color:#777;
+      margin-bottom:16px;
+      font-weight:700;
     }
 
     .question{
       font-size:24px;
       font-weight:700;
+      line-height:1.5;
       margin-bottom:20px;
-      line-height:1.4;
     }
 
     .answers{
@@ -67,203 +65,86 @@
 
     .answers button{
       border:none;
-      background:#f3f5fb;
+      background:#f3f6ff;
       padding:16px;
       border-radius:14px;
       font-size:16px;
       text-align:left;
       cursor:pointer;
       transition:0.2s ease;
+      color:#222;
     }
 
     .answers button:hover{
-      background:#e2e9ff;
+      background:#e3eaff;
       transform:translateY(-2px);
     }
 
-    .name-box{
-      margin-bottom:20px;
-    }
-
-    .name-box input{
-      width:100%;
-      padding:14px 16px;
-      border:1px solid #ddd;
-      border-radius:12px;
-      font-size:15px;
-      outline:none;
-    }
-
-    .screen{
+    .feedback-box{
+      margin-top:20px;
+      background:#f9fbff;
+      border-radius:18px;
+      padding:20px;
+      text-align:center;
       display:none;
     }
 
-    .screen.active{
-      display:block;
-    }
-
-    .btn-row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      justify-content:center;
-      margin-top:20px;
-    }
-
-    .main-btn{
-      border:none;
-      background:#222;
-      color:#fff;
-      padding:14px 18px;
-      border-radius:12px;
-      cursor:pointer;
-      font-size:15px;
-    }
-
-    .main-btn:hover{
-      opacity:0.92;
-    }
-
-    .result-box{
-      background:#f8faff;
-      border-radius:16px;
-      padding:18px;
-      margin-top:18px;
-      display:grid;
-      gap:12px;
-    }
-
-    .result-item{
-      background:#fff;
-      border-left:4px solid #6a7cff;
-      border-radius:12px;
-      padding:12px 14px;
-      line-height:1.5;
-    }
-
-    .status{
-      margin-top:16px;
-      font-size:14px;
-      color:#444;
-      min-height:24px;
-      text-align:center;
-    }
-
-    .loader-wrap{
-      margin-top:28px;
-    }
-
-    .loader-text{
-      text-align:center;
-      font-size:18px;
-      font-weight:700;
-      margin-bottom:16px;
-    }
-
-    .loader-bar{
-      width:100%;
-      height:18px;
-      background:#eceff6;
-      border-radius:999px;
-      overflow:hidden;
-    }
-
-    .loader-fill{
-      width:0%;
-      height:100%;
-      background:linear-gradient(90deg, #6a7cff, #9f6bff);
-      border-radius:999px;
-      transition:width 0.3s ease;
-    }
-
-    .analysis-lines{
-      margin-top:18px;
-      display:grid;
-      gap:10px;
-    }
-
-    .analysis-line{
-      background:#f6f8ff;
-      border-radius:12px;
-      padding:12px 14px;
-      color:#555;
-      opacity:0;
-      transform:translateY(6px);
-      transition:0.3s ease;
-    }
-
-    .analysis-line.show{
-      opacity:1;
-      transform:translateY(0);
-    }
-
-    .verdict-card{
-      margin-top:22px;
-      background:linear-gradient(135deg, #fff4c7, #ffe3ef);
-      border:2px dashed #222;
-      border-radius:20px;
-      padding:24px;
-      text-align:center;
-    }
-
-    .verdict-emoji{
-      font-size:72px;
-      margin-bottom:12px;
-    }
-
-    .verdict-title{
-      font-size:30px;
-      font-weight:800;
+    .feedback-emoji{
+      font-size:54px;
       margin-bottom:10px;
     }
 
-    .verdict-text{
-      font-size:18px;
+    .feedback-text{
+      font-size:22px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .feedback-small{
+      color:#666;
       line-height:1.6;
     }
 
-    .meter-wrap{
-      margin:20px 0 8px;
-      text-align:left;
+    .next-btn,
+    .restart-btn{
+      margin-top:18px;
+      border:none;
+      background:#222;
+      color:#fff;
+      padding:14px 20px;
+      border-radius:12px;
+      font-size:15px;
+      cursor:pointer;
     }
 
-    .meter-label{
-      font-size:14px;
-      color:#333;
-      margin-bottom:8px;
-      font-weight:700;
+    .next-btn:hover,
+    .restart-btn:hover{
+      opacity:0.92;
     }
 
-    .meter{
-      width:100%;
-      height:20px;
-      background:#f1f1f1;
-      border-radius:999px;
-      overflow:hidden;
-      border:1px solid #ddd;
+    .result-screen{
+      display:none;
+      text-align:center;
     }
 
-    .meter-fill{
-      width:0%;
-      height:100%;
-      background:linear-gradient(90deg, #ffb347, #ff5e7e);
-      transition:width 1.2s ease;
+    .result-screen h2{
+      font-size:30px;
+      margin-bottom:10px;
     }
 
-    .meter-note{
-      margin-top:8px;
-      font-size:13px;
+    .final-score{
+      font-size:24px;
+      font-weight:800;
+      margin:18px 0;
+    }
+
+    .result-note{
       color:#666;
-    }
-
-    .tiny-note{
-      margin-top:14px;
-      font-size:14px;
-      color:#666;
+      line-height:1.7;
     }
 
     @media (max-width:600px){
-      .game-container{
+      .game-box{
         padding:20px;
       }
 
@@ -279,349 +160,161 @@
         font-size:15px;
       }
 
-      .verdict-title{
-        font-size:24px;
-      }
-
-      .verdict-text{
-        font-size:16px;
+      .feedback-text{
+        font-size:19px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
+  <div class="game-box">
+    <div id="quizScreen">
+      <h1>Trick Question Game</h1>
+      <p class="subtitle">Let’s see if your mind is sharp enough for these 5 trick questions 👀</p>
 
-    <div class="screen active" id="startScreen">
-      <h1>Erha's Choice Game</h1>
-      <p class="subtitle">
-        Answer these questions honestly and let’s discover the truth once and for all 👀
-      </p>
-
-      <div class="name-box">
-        <input type="text" id="playerName" placeholder="Enter your name" />
-      </div>
-
-      <div class="btn-row">
-        <button class="main-btn" onclick="startGame()">Start Game</button>
-      </div>
-    </div>
-
-    <div class="screen" id="quizScreen">
       <div class="progress" id="progressText"></div>
       <div class="question" id="questionText"></div>
       <div class="answers" id="answersBox"></div>
-    </div>
 
-    <div class="screen" id="analysisScreen">
-      <h1>Analyzing Answers... 🧠</h1>
-      <p class="subtitle">Please wait while the highly advanced relationship engine reviews the truth.</p>
-
-      <div class="loader-wrap">
-        <div class="loader-text" id="loaderPercent">0% Complete</div>
-        <div class="loader-bar">
-          <div class="loader-fill" id="loaderFill"></div>
-        </div>
-      </div>
-
-      <div class="analysis-lines">
-        <div class="analysis-line" id="line1">Checking emotional logic...</div>
-        <div class="analysis-line" id="line2">Comparing Cerelac dispute records...</div>
-        <div class="analysis-line" id="line3">Measuring stubbornness vs softness...</div>
-        <div class="analysis-line" id="line4">Calculating who really won...</div>
-      </div>
-
-      <div class="status" id="analysisStatus">Sending your answers...</div>
-    </div>
-
-    <div class="screen" id="resultScreen">
-      <h1>Final Verdict 😂</h1>
-      <p class="subtitle">The investigation has now been completed successfully.</p>
-
-      <div class="result-box" id="resultBox"></div>
-
-      <div class="verdict-card">
-        <div class="verdict-emoji">🤣🤣🤣</div>
-        <div class="verdict-title">Kojo Wins This Round</div>
-
-        <div class="meter-wrap">
-          <div class="meter-label">Bias-Free Truth Meter</div>
-          <div class="meter">
-            <div class="meter-fill" id="meterFill"></div>
-          </div>
-          <div class="meter-note">Verdict confidence: <span id="meterValue">0%</span> in Kojo’s favor</div>
-        </div>
-
-        <div class="verdict-text" id="memeText">
-          After carefully reviewing your answers, the final conclusion is that Kojo was right all along.
-        </div>
-
-        <div class="tiny-note">
-          Independent panel of experts: Kojo, Kojo’s thoughts, and Kojo’s future self.
-        </div>
-      </div>
-
-      <div class="status" id="resultStatus"></div>
-
-      <div class="btn-row">
-        <button class="main-btn" onclick="restartGame()">Play Again</button>
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-emoji" id="feedbackEmoji"></div>
+        <div class="feedback-text" id="feedbackText"></div>
+        <div class="feedback-small" id="feedbackSmall"></div>
+        <button class="next-btn" id="nextBtn">Next Question</button>
       </div>
     </div>
 
+    <div class="result-screen" id="resultScreen">
+      <h2>Game Complete 🎉</h2>
+      <p class="result-note">That was your final mind test result.</p>
+      <div class="final-score">Score: <span id="finalScore">0</span> / 5</div>
+      <p class="result-note" id="finalMessage"></p>
+      <button class="restart-btn" onclick="restartGame()">Play Again</button>
+    </div>
   </div>
 
   <script>
-    const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
-    const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
-    const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
-
-    emailjs.init({
-      publicKey: EMAILJS_PUBLIC_KEY
-    });
-
     const questions = [
       {
-        question: "Kojo says he wants something in return for buying Cerelac. What do you choose?",
-        answers: [
-          "Sing for him immediately",
-          "Say God will bless him instead",
-          "Refuse completely",
-          "Ask him to buy it first"
-        ]
+        question: "Some months have 31 days, some have 30. How many have 28 days?",
+        answers: ["1", "2", "12", "6"],
+        correct: 2,
+        explanation: "All 12 months have at least 28 days."
       },
       {
-        question: "He says he's already blessed. What should happen next?",
-        answers: [
-          "Laugh and change the topic",
-          "Promise to sing another day",
-          "Get offended",
-          "Ask for two Cerelacs instead"
-        ]
+        question: "If a plane crashes on the border of Ghana and Togo, where do they bury the survivors?",
+        answers: ["Ghana", "Togo", "Both countries", "Nowhere"],
+        correct: 3,
+        explanation: "You don’t bury survivors."
       },
       {
-        question: "If someone wants a favor from you, what matters most?",
-        answers: [
-          "Timing",
-          "Effort",
-          "Mood",
-          "Whether they deserve it"
-        ]
+        question: "What gets wetter the more it dries?",
+        answers: ["A towel", "Water", "Soap", "Rain"],
+        correct: 0,
+        explanation: "A towel gets wetter while drying you."
       },
       {
-        question: "Which best describes your personality in situations like this?",
-        answers: [
-          "Playful",
-          "Stubborn",
-          "Soft-hearted",
-          "Mysterious"
-        ]
+        question: "How many animals of each sex did Moses take on the ark?",
+        answers: ["2", "1", "None", "4"],
+        correct: 2,
+        explanation: "It was Noah, not Moses."
       },
       {
-        question: "Final question: what should Kojo learn from all this?",
-        answers: [
-          "Patience",
-          "Negotiation skills",
-          "Never joke with Cerelac matters",
-          "Erha always has the final say"
-        ]
+        question: "A farmer has 17 sheep. All but 9 run away. How many are left?",
+        answers: ["8", "9", "17", "0"],
+        correct: 1,
+        explanation: "All but 9 ran away, so 9 are left."
       }
     ];
 
     let currentQuestion = 0;
-    let selectedAnswers = [];
-    let playerName = "";
-    let alreadySent = false;
-
-    const startScreen = document.getElementById("startScreen");
-    const quizScreen = document.getElementById("quizScreen");
-    const analysisScreen = document.getElementById("analysisScreen");
-    const resultScreen = document.getElementById("resultScreen");
+    let score = 0;
 
     const progressText = document.getElementById("progressText");
     const questionText = document.getElementById("questionText");
     const answersBox = document.getElementById("answersBox");
-    const resultBox = document.getElementById("resultBox");
-
-    const loaderFill = document.getElementById("loaderFill");
-    const loaderPercent = document.getElementById("loaderPercent");
-    const analysisStatus = document.getElementById("analysisStatus");
-
-    const meterFill = document.getElementById("meterFill");
-    const meterValue = document.getElementById("meterValue");
-    const memeText = document.getElementById("memeText");
-    const resultStatus = document.getElementById("resultStatus");
-
-    const analysisLines = [
-      document.getElementById("line1"),
-      document.getElementById("line2"),
-      document.getElementById("line3"),
-      document.getElementById("line4")
-    ];
-
-    function startGame() {
-      playerName = document.getElementById("playerName").value.trim() || "Anonymous";
-      currentQuestion = 0;
-      selectedAnswers = [];
-      alreadySent = false;
-
-      startScreen.classList.remove("active");
-      resultScreen.classList.remove("active");
-      analysisScreen.classList.remove("active");
-      quizScreen.classList.add("active");
-
-      loadQuestion();
-    }
+    const feedbackBox = document.getElementById("feedbackBox");
+    const feedbackEmoji = document.getElementById("feedbackEmoji");
+    const feedbackText = document.getElementById("feedbackText");
+    const feedbackSmall = document.getElementById("feedbackSmall");
+    const nextBtn = document.getElementById("nextBtn");
+    const quizScreen = document.getElementById("quizScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const finalScore = document.getElementById("finalScore");
+    const finalMessage = document.getElementById("finalMessage");
 
     function loadQuestion() {
-      const current = questions[currentQuestion];
+      const q = questions[currentQuestion];
       progressText.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
-      questionText.textContent = current.question;
+      questionText.textContent = q.question;
       answersBox.innerHTML = "";
+      feedbackBox.style.display = "none";
 
-      current.answers.forEach(answer => {
+      q.answers.forEach((answer, index) => {
         const btn = document.createElement("button");
         btn.textContent = answer;
-        btn.addEventListener("click", () => selectAnswer(answer));
+        btn.addEventListener("click", () => checkAnswer(index));
         answersBox.appendChild(btn);
       });
     }
 
-    function selectAnswer(answer) {
-      if (alreadySent) return;
+    function checkAnswer(selectedIndex) {
+      const q = questions[currentQuestion];
+      const buttons = answersBox.querySelectorAll("button");
+      buttons.forEach(btn => btn.disabled = true);
 
-      selectedAnswers.push({
-        question: questions[currentQuestion].question,
-        answer: answer
-      });
+      feedbackBox.style.display = "block";
 
+      if (selectedIndex === q.correct) {
+        score++;
+        feedbackEmoji.textContent = "😌";
+        feedbackText.textContent = "Yeah, you’re getting a Cerelac";
+        feedbackSmall.textContent = q.explanation;
+      } else {
+        feedbackEmoji.textContent = "🤣";
+        feedbackText.textContent = "Wrong answer";
+        feedbackSmall.textContent = q.explanation;
+      }
+
+      if (currentQuestion === questions.length - 1) {
+        nextBtn.textContent = "See Result";
+      } else {
+        nextBtn.textContent = "Next Question";
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
       currentQuestion++;
-
       if (currentQuestion < questions.length) {
         loadQuestion();
       } else {
-        showAnalysisScreen();
-        sendResultsAutomatically();
-        runFakeAnalysis();
+        showResults();
       }
-    }
-
-    function buildAnswersSummary() {
-      return selectedAnswers.map((item, index) => {
-        return `Question ${index + 1}: ${item.question}\nChosen Answer: ${item.answer}`;
-      }).join("\n\n");
-    }
-
-    async function sendResultsAutomatically() {
-      if (alreadySent) return;
-      alreadySent = true;
-
-      const templateParams = {
-        player_name: playerName,
-        submitted_at: new Date().toLocaleString(),
-        answers_summary: buildAnswersSummary()
-      };
-
-      try {
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          templateParams
-        );
-        analysisStatus.textContent = "Answers sent successfully.";
-      } catch (error) {
-        console.error("Email sending failed:", error);
-        analysisStatus.textContent = "Could not send answers. Check EmailJS settings.";
-      }
-    }
-
-    function showAnalysisScreen() {
-      quizScreen.classList.remove("active");
-      analysisScreen.classList.add("active");
-
-      loaderFill.style.width = "0%";
-      loaderPercent.textContent = "0% Complete";
-      analysisLines.forEach(line => line.classList.remove("show"));
-    }
-
-    function runFakeAnalysis() {
-      const revealTimes = [400, 1100, 1800, 2600];
-      revealTimes.forEach((time, index) => {
-        setTimeout(() => analysisLines[index].classList.add("show"), time);
-      });
-
-      let progress = 0;
-      const timer = setInterval(() => {
-        progress += Math.floor(Math.random() * 11) + 6;
-        if (progress > 100) progress = 100;
-
-        loaderFill.style.width = progress + "%";
-        loaderPercent.textContent = progress + "% Complete";
-
-        if (progress >= 100) {
-          clearInterval(timer);
-          setTimeout(showResults, 700);
-        }
-      }, 250);
-    }
+    });
 
     function showResults() {
-      analysisScreen.classList.remove("active");
-      resultScreen.classList.add("active");
-      resultBox.innerHTML = "";
+      quizScreen.style.display = "none";
+      resultScreen.style.display = "block";
+      finalScore.textContent = score;
 
-      selectedAnswers.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "result-item";
-        div.innerHTML = `
-          <strong>Question ${index + 1}:</strong> ${item.question}<br>
-          <strong>Chosen Answer:</strong> ${item.answer}
-        `;
-        resultBox.appendChild(div);
-      });
-
-      memeText.textContent = `${playerName}, after reviewing every answer with absolutely unbiased analysis, the final conclusion is that Kojo was right all along and deserves to be laughed with, not argued with. 🤣`;
-
-      resultStatus.textContent = "Deep truth extraction complete.";
-      animateMeter();
-    }
-
-    function animateMeter() {
-      let value = 0;
-      const target = 97;
-      meterFill.style.width = "0%";
-      meterValue.textContent = "0%";
-
-      const meterTimer = setInterval(() => {
-        value += 3;
-        if (value >= target) {
-          value = target;
-          clearInterval(meterTimer);
-        }
-        meterFill.style.width = value + "%";
-        meterValue.textContent = value + "%";
-      }, 35);
+      if (score === 5) {
+        finalMessage.textContent = "Your brain is dangerous. Full Cerelac approved.";
+      } else if (score >= 3) {
+        finalMessage.textContent = "Not bad at all. You almost outsmarted the game.";
+      } else {
+        finalMessage.textContent = "Go sleep with empty stomach🤣";
+      }
     }
 
     function restartGame() {
-      document.getElementById("playerName").value = "";
-      resultBox.innerHTML = "";
-      resultStatus.textContent = "";
-      analysisStatus.textContent = "Sending your answers...";
-      loaderFill.style.width = "0%";
-      loaderPercent.textContent = "0% Complete";
-      meterFill.style.width = "0%";
-      meterValue.textContent = "0%";
-      analysisLines.forEach(line => line.classList.remove("show"));
-
-      startScreen.classList.add("active");
-      quizScreen.classList.remove("active");
-      analysisScreen.classList.remove("active");
-      resultScreen.classList.remove("active");
-
       currentQuestion = 0;
-      selectedAnswers = [];
-      alreadySent = false;
+      score = 0;
+      quizScreen.style.display = "block";
+      resultScreen.style.display = "none";
+      loadQuestion();
     }
+
+    loadQuestion();
   </script>
 </body>
 </html>
