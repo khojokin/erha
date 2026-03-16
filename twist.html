@@ -1,0 +1,558 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Hallway Below</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top, rgba(70,70,90,0.18), transparent 35%),
+        linear-gradient(180deg, #0f1117, #090b10 60%, #050608);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      color:#ececec;
+    }
+
+    .game-box{
+      width:100%;
+      max-width:880px;
+      background:rgba(16,18,24,0.96);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:24px;
+      padding:28px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    h1{
+      text-align:center;
+      font-size:31px;
+      margin-bottom:10px;
+      letter-spacing:0.5px;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:#aeb4c0;
+      margin-bottom:24px;
+      line-height:1.7;
+    }
+
+    .screen{
+      display:none;
+    }
+
+    .screen.active{
+      display:block;
+    }
+
+    .name-box{
+      margin-bottom:18px;
+    }
+
+    .name-box input{
+      width:100%;
+      padding:14px 16px;
+      border:1px solid rgba(255,255,255,0.1);
+      background:#0d1016;
+      color:#fff;
+      border-radius:12px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .name-box input::placeholder{
+      color:#7f8693;
+    }
+
+    .main-btn,
+    .choice-btn{
+      border:none;
+      border-radius:14px;
+      cursor:pointer;
+      transition:0.2s ease;
+    }
+
+    .main-btn{
+      background:#d8dce6;
+      color:#111;
+      padding:14px 22px;
+      font-size:15px;
+      display:block;
+      margin:0 auto;
+      font-weight:700;
+    }
+
+    .main-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .progress{
+      font-size:14px;
+      color:#8c93a1;
+      font-weight:700;
+      margin-bottom:14px;
+    }
+
+    .chapter-tag{
+      display:inline-block;
+      background:#161b25;
+      color:#cfd5e2;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:16px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+
+    .story-box{
+      background:#0d1016;
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:18px;
+      padding:22px;
+      line-height:1.95;
+      color:#dbe0ea;
+      margin-bottom:20px;
+      font-size:17px;
+      min-height:220px;
+    }
+
+    .choices{
+      display:grid;
+      gap:14px;
+    }
+
+    .choice-btn{
+      width:100%;
+      background:#141925;
+      color:#edf1f8;
+      padding:16px;
+      text-align:left;
+      font-size:16px;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+
+    .choice-btn:hover{
+      background:#1a2130;
+      transform:translateY(-2px);
+    }
+
+    .feedback-box{
+      display:none;
+      margin-top:20px;
+      background:#11151d;
+      border:1px dashed rgba(255,255,255,0.18);
+      border-radius:18px;
+      padding:20px;
+      text-align:center;
+    }
+
+    .feedback-emoji{
+      font-size:48px;
+      margin-bottom:10px;
+    }
+
+    .feedback-title{
+      font-size:24px;
+      font-weight:800;
+      margin-bottom:10px;
+      color:#f3f5f8;
+    }
+
+    .feedback-text{
+      color:#aeb4c0;
+      line-height:1.7;
+      margin-bottom:16px;
+    }
+
+    .result-card{
+      text-align:center;
+      background:
+        linear-gradient(180deg, rgba(28,31,39,0.98), rgba(12,14,19,0.98));
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:22px;
+      padding:24px;
+      margin-top:20px;
+    }
+
+    .result-emoji{
+      font-size:60px;
+      margin-bottom:10px;
+    }
+
+    .result-title{
+      font-size:30px;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+
+    .result-text{
+      font-size:18px;
+      line-height:1.8;
+      color:#dbe0ea;
+    }
+
+    .history-box{
+      margin-top:20px;
+      background:#0d1016;
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:16px;
+      padding:18px;
+    }
+
+    .history-box h3{
+      margin-bottom:10px;
+      font-size:18px;
+    }
+
+    .history-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .history-item{
+      background:#121722;
+      border-left:4px solid #81889a;
+      border-radius:12px;
+      padding:12px 14px;
+      line-height:1.6;
+      color:#c8cfdb;
+    }
+
+    .thanks{
+      margin-top:18px;
+      text-align:center;
+      color:#99a1af;
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    @media (max-width:600px){
+      .game-box{
+        padding:20px;
+      }
+
+      h1{
+        font-size:24px;
+      }
+
+      .story-box{
+        font-size:16px;
+        min-height:180px;
+      }
+
+      .choice-btn{
+        font-size:15px;
+      }
+
+      .feedback-title,
+      .result-title{
+        font-size:22px;
+      }
+
+      .result-text{
+        font-size:16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="screen active" id="startScreen">
+      <h1>The Hallway Below</h1>
+      <p class="subtitle">
+        A scary story where each choice decides what happens next.<br>
+        Stay calm. Read carefully. Some doors should not be opened twice.
+      </p>
+
+      <div class="name-box">
+        <input type="text" id="playerName" placeholder="Enter your name" />
+      </div>
+
+      <button class="main-btn" onclick="startGame()">Begin</button>
+    </div>
+
+    <div class="screen" id="storyScreen">
+      <div class="progress" id="progressText"></div>
+      <div class="chapter-tag" id="chapterTag"></div>
+      <div class="story-box" id="storyText"></div>
+      <div class="choices" id="choicesBox"></div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-emoji" id="feedbackEmoji"></div>
+        <div class="feedback-title" id="feedbackTitle"></div>
+        <div class="feedback-text" id="feedbackText"></div>
+        <button class="main-btn" id="nextBtn">Continue</button>
+      </div>
+    </div>
+
+    <div class="screen" id="resultScreen">
+      <h1>Ending</h1>
+      <p class="subtitle">The story is over. The hallway is not.</p>
+
+      <div class="result-card">
+        <div class="result-emoji" id="resultEmoji">😨</div>
+        <div class="result-title" id="resultTitle">You Were Never Alone</div>
+        <div class="result-text" id="resultText"></div>
+      </div>
+
+      <div class="history-box">
+        <h3>Your Decisions</h3>
+        <div class="history-list" id="historyList"></div>
+      </div>
+
+      <div class="thanks">
+        Thanks for playing.<br>
+        If the hallway appears again tonight, do not answer when it calls your name.
+      </div>
+
+      <div style="margin-top:22px;">
+        <button class="main-btn" onclick="restartGame()">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chapters = [
+      {
+        tag: "Part 1: The Knock",
+        story: (name) => `It starts just after midnight. ${name}, you are alone in your room when three slow knocks sound from somewhere beneath your bed. Not at the door. Not at the window. Beneath the bed. The sound is deliberate, like whoever made it wanted you to understand that it was waiting. Your phone screen lights up by itself. There is no notification — only a black wallpaper you have never seen before, showing a narrow hallway with one dim bulb hanging over a red door. Then the bulb on your ceiling flickers once, twice, and goes dead. In the dark, you hear breathing that does not belong to you.`,
+        choices: [
+          {
+            text: "Get off the bed and look underneath.",
+            emoji: "🕳️",
+            title: "Too Curious",
+            reaction: "You kneel slowly and lift the blanket edge. There is no face there, no body — only darkness deeper than the room should hold, like a hole cut into the world."
+          },
+          {
+            text: "Grab your phone and turn on the flashlight.",
+            emoji: "📱",
+            title: "A Thin Circle of Light",
+            reaction: "The flashlight works, but only weakly. The beam trembles over the floorboards. For a second, you think you see fingers slide back into the shadows under the bed."
+          },
+          {
+            text: "Stay perfectly still and listen.",
+            emoji: "👂",
+            title: "The Wrong Silence",
+            reaction: "The breathing stops. That silence is worse. It feels like something has realized you are listening back."
+          }
+        ]
+      },
+      {
+        tag: "Part 2: The Hallway",
+        story: (name) => `The floor beneath your bed shifts with a low wooden groan. A seam appears in the boards, widening into a trapdoor you swear was never there. Cold air rises from below, carrying the smell of damp walls and something metallic underneath it. You shine your light down and see the hallway from your phone screen exactly as it was: narrow walls, a hanging bulb, and far ahead, the red door. You also hear something else now — soft footsteps below, pacing, then stopping whenever you do.`,
+        choices: [
+          {
+            text: "Climb down into the hallway.",
+            emoji: "🚪",
+            title: "No Turning Back",
+            reaction: "The ladder is colder than ice. The moment both your feet touch the floor below, the trapdoor above closes by itself."
+          },
+          {
+            text: "Call out and ask who is there.",
+            emoji: "😶",
+            title: "Bad Idea",
+            reaction: "Your voice travels down the hallway and returns a second later in a whisper that sounds almost like yours... but older, weaker, and afraid."
+          },
+          {
+            text: "Try to close the trapdoor and ignore it all.",
+            emoji: "🪵",
+            title: "Refusal",
+            reaction: "You push with all your strength, but the opening will not shut. From below, something knocks once from the underside, as if asking to be let up."
+          }
+        ]
+      },
+      {
+        tag: "Part 3: The Portraits",
+        story: (name) => `No matter what you chose, the hallway stretches ahead and the red door remains at the end. Along the walls are crooked portrait frames. Each one is covered with dusty cloth except the nearest. When you lift it, you feel your stomach drop. It is a painting of you, standing in this exact hallway, except in the painting your eyes are closed and there is a shadow just behind your shoulder. Farther down the corridor, other frames hang slightly open, as if something inside them has been trying to get out.`,
+        choices: [
+          {
+            text: "Pull the cloth off the next portrait too.",
+            emoji: "🖼️",
+            title: "The Faces Change",
+            reaction: "The second portrait is also you — only older, pale, and staring directly at the painter with a look of exhausted warning."
+          },
+          {
+            text: "Leave the portraits alone and keep walking.",
+            emoji: "🚶",
+            title: "Eyes on the Door",
+            reaction: "You refuse to look again, but as you pass, you hear canvas creak softly behind the frames like someone shifting their weight."
+          },
+          {
+            text: "Turn the nearest portrait to face the wall.",
+            emoji: "↩️",
+            title: "Small Defiance",
+            reaction: "The frame turns, but the hallway bulb begins to swing as if something above you is suddenly restless."
+          }
+        ]
+      },
+      {
+        tag: "Part 4: The Red Door",
+        story: (name) => `At last you reach the red door. Up close, it is worse than it looked from a distance. The paint is cracked and dark around the handle, and there are shallow scratch marks along the wood as though someone once tried to claw their way out. On the door, written in faint chalk, are the words: “Do not let it hear you choose.” The handle trembles gently as though something on the other side is breathing against it. Behind you, the hallway stretches back into darkness. Ahead of you, the door waits.`,
+        choices: [
+          {
+            text: "Open the door immediately before you lose your nerve.",
+            emoji: "🚨",
+            title: "The Fast Choice",
+            reaction: "The hinges give a long, painful groan. Cold blackness opens inside, and somewhere far within it, something shuffles upright."
+          },
+          {
+            text: "Put your ear to the door first.",
+            emoji: "👁️",
+            title: "It Hears You Too",
+            reaction: "You hear wet breathing and then, very clearly, your own voice from the other side whispering, “Please don’t open it.”"
+          },
+          {
+            text: "Step back and read the chalk message again.",
+            emoji: "✍️",
+            title: "Too Late",
+            reaction: "The writing is different now. It no longer says “Do not let it hear you choose.” It now says: “It already did.”"
+          }
+        ]
+      },
+      {
+        tag: "Part 5: The Room Behind",
+        story: (name) => `The room behind the red door is almost empty. The only furniture is a wooden chair facing a cracked mirror. Above it hangs the same bulb from your ceiling — the one that went dead in your room. In the mirror, however, the reflection is wrong. It does not show the room as it is. It shows your bedroom upstairs, dark and silent, with your bed still neatly made. On the mattress sits a figure shaped like you, motionless, facing the wall. Then the figure in the mirror slowly turns its head toward you, even though you are standing down here in the room below.`,
+        choices: [
+          {
+            text: "Approach the mirror and look closer.",
+            emoji: "🪞",
+            title: "The Reflection Smiles",
+            reaction: "As you step closer, the thing in the mirror smiles first. You did not."
+          },
+          {
+            text: "Turn away from the mirror and check behind the chair.",
+            emoji: "🪑",
+            title: "The Chair Was Occupied",
+            reaction: "There are deep marks in the wood, as if someone had gripped it for hours, waiting to be told when they could leave."
+          },
+          {
+            text: "Close your eyes and back toward the hallway.",
+            emoji: "😖",
+            title: "It Moved Anyway",
+            reaction: "Even with your eyes shut, you hear the mirror crack once, then hear footsteps that do not belong to you cross the room."
+          }
+        ]
+      }
+    ];
+
+    let currentChapter = 0;
+    let playerName = "";
+    let history = [];
+
+    const startScreen = document.getElementById("startScreen");
+    const storyScreen = document.getElementById("storyScreen");
+    const resultScreen = document.getElementById("resultScreen");
+
+    const progressText = document.getElementById("progressText");
+    const chapterTag = document.getElementById("chapterTag");
+    const storyText = document.getElementById("storyText");
+    const choicesBox = document.getElementById("choicesBox");
+
+    const feedbackBox = document.getElementById("feedbackBox");
+    const feedbackEmoji = document.getElementById("feedbackEmoji");
+    const feedbackTitle = document.getElementById("feedbackTitle");
+    const feedbackText = document.getElementById("feedbackText");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const resultEmoji = document.getElementById("resultEmoji");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultText = document.getElementById("resultText");
+    const historyList = document.getElementById("historyList");
+
+    function startGame() {
+      playerName = document.getElementById("playerName").value.trim() || "Traveler";
+      currentChapter = 0;
+      history = [];
+
+      startScreen.classList.remove("active");
+      resultScreen.classList.remove("active");
+      storyScreen.classList.add("active");
+
+      loadChapter();
+    }
+
+    function loadChapter() {
+      const chapter = chapters[currentChapter];
+      progressText.textContent = `Part ${currentChapter + 1} of ${chapters.length}`;
+      chapterTag.textContent = chapter.tag;
+      storyText.textContent = chapter.story(playerName);
+      choicesBox.innerHTML = "";
+      feedbackBox.style.display = "none";
+
+      chapter.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = choice.text;
+        btn.addEventListener("click", () => chooseOption(choice));
+        choicesBox.appendChild(btn);
+      });
+    }
+
+    function chooseOption(choice) {
+      const buttons = choicesBox.querySelectorAll(".choice-btn");
+      buttons.forEach(btn => btn.disabled = true);
+
+      history.push({
+        chapter: chapters[currentChapter].tag,
+        choice: choice.text
+      });
+
+      feedbackEmoji.textContent = choice.emoji;
+      feedbackTitle.textContent = choice.title;
+      feedbackText.textContent = choice.reaction;
+      feedbackBox.style.display = "block";
+
+      nextBtn.textContent = currentChapter === chapters.length - 1 ? "Reveal the Ending" : "Continue";
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentChapter++;
+      if (currentChapter < chapters.length) {
+        loadChapter();
+      } else {
+        showEnding();
+      }
+    });
+
+    function showEnding() {
+      storyScreen.classList.remove("active");
+      resultScreen.classList.add("active");
+      historyList.innerHTML = "";
+
+      history.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerHTML = `<strong>${item.chapter}</strong><br>${item.choice}`;
+        historyList.appendChild(div);
+      });
+
+      resultEmoji.textContent = "😨";
+      resultTitle.textContent = "Plot Twist: You Opened It For Yourself";
+      resultText.textContent =
+        `${playerName}, the final truth waits in the broken mirror. The hallway was never under your room. It was your room — or rather, what was left of it from the other side. The figure sitting on the bed upstairs was not watching you. It was replacing you. Every choice you made did matter, but not in the way you thought: each one taught the thing behind the mirror how you think, how you hesitate, what scares you, and what voice to use when it speaks. When the mirror cracked, it was not breaking. It was opening. And now, while you stand here reading this ending, something wearing your face is upstairs, climbing into your bed, unlocking your phone, and learning your name one last time before morning.`;
+    }
+
+    function restartGame() {
+      document.getElementById("playerName").value = "";
+      currentChapter = 0;
+      history = [];
+
+      startScreen.classList.add("active");
+      storyScreen.classList.remove("active");
+      resultScreen.classList.remove("active");
+    }
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -44,6 +44,37 @@
       line-height:1.6;
     }
 
+    .name-box{
+      margin-bottom:18px;
+    }
+
+    .name-box input{
+      width:100%;
+      padding:14px 16px;
+      border:1px solid #ddd;
+      border-radius:12px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .start-btn,
+    .next-btn,
+    .restart-btn{
+      border:none;
+      background:#222;
+      color:#fff;
+      padding:14px 20px;
+      border-radius:12px;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .start-wrap{
+      display:flex;
+      justify-content:center;
+      margin-bottom:8px;
+    }
+
     .progress{
       font-size:14px;
       color:#777;
@@ -80,6 +111,12 @@
       transform:translateY(-2px);
     }
 
+    .answers button:disabled{
+      opacity:0.8;
+      cursor:not-allowed;
+      transform:none;
+    }
+
     .feedback-box{
       margin-top:20px;
       background:#f9fbff;
@@ -105,21 +142,8 @@
       line-height:1.6;
     }
 
-    .next-btn,
-    .restart-btn{
+    .next-btn{
       margin-top:18px;
-      border:none;
-      background:#222;
-      color:#fff;
-      padding:14px 20px;
-      border-radius:12px;
-      font-size:15px;
-      cursor:pointer;
-    }
-
-    .next-btn:hover,
-    .restart-btn:hover{
-      opacity:0.92;
     }
 
     .result-screen{
@@ -141,6 +165,17 @@
     .result-note{
       color:#666;
       line-height:1.7;
+    }
+
+    .status{
+      margin-top:16px;
+      font-size:14px;
+      color:#444;
+      min-height:22px;
+    }
+
+    .hidden-form{
+      display:none;
     }
 
     @media (max-width:600px){
@@ -168,10 +203,18 @@
 </head>
 <body>
   <div class="game-box">
-    <div id="quizScreen">
+    <div id="startScreen">
       <h1>Trick Question Game</h1>
       <p class="subtitle">Let’s see if your mind is sharp enough for these 5 trick questions 👀</p>
+      <div class="name-box">
+        <input type="text" id="playerName" placeholder="Enter your name" />
+      </div>
+      <div class="start-wrap">
+        <button class="start-btn" onclick="startGame()">Start Game</button>
+      </div>
+    </div>
 
+    <div id="quizScreen" style="display:none;">
       <div class="progress" id="progressText"></div>
       <div class="question" id="questionText"></div>
       <div class="answers" id="answersBox"></div>
@@ -186,11 +229,30 @@
 
     <div class="result-screen" id="resultScreen">
       <h2>Game Complete 🎉</h2>
-      <p class="result-note">That was your final mind test result.</p>
+      <p class="result-note">Your final result has been calculated.</p>
       <div class="final-score">Score: <span id="finalScore">0</span> / 5</div>
       <p class="result-note" id="finalMessage"></p>
-      <button class="restart-btn" onclick="restartGame()">Play Again</button>
+      <div class="status" id="submitStatus">Sending result...</div>
+      <button class="restart-btn" onclick="restartGame()" style="margin-top:18px;">Play Again</button>
     </div>
+
+    <!-- Static Netlify form blueprint -->
+    <form
+      name="cerelac-quiz-results"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      class="hidden-form"
+    >
+      <input type="hidden" name="form-name" value="cerelac-quiz-results" />
+      <input type="text" name="player_name" />
+      <input type="text" name="score" />
+      <input type="text" name="total" />
+      <input type="text" name="result_message" />
+      <textarea name="answers"></textarea>
+      <input type="text" name="submitted_at" />
+      <input type="text" name="bot-field" />
+    </form>
   </div>
 
   <script>
@@ -229,6 +291,13 @@
 
     let currentQuestion = 0;
     let score = 0;
+    let playerName = "";
+    let chosenAnswers = [];
+    let resultSent = false;
+
+    const startScreen = document.getElementById("startScreen");
+    const quizScreen = document.getElementById("quizScreen");
+    const resultScreen = document.getElementById("resultScreen");
 
     const progressText = document.getElementById("progressText");
     const questionText = document.getElementById("questionText");
@@ -238,10 +307,24 @@
     const feedbackText = document.getElementById("feedbackText");
     const feedbackSmall = document.getElementById("feedbackSmall");
     const nextBtn = document.getElementById("nextBtn");
-    const quizScreen = document.getElementById("quizScreen");
-    const resultScreen = document.getElementById("resultScreen");
+
     const finalScore = document.getElementById("finalScore");
     const finalMessage = document.getElementById("finalMessage");
+    const submitStatus = document.getElementById("submitStatus");
+
+    function startGame() {
+      playerName = document.getElementById("playerName").value.trim() || "Anonymous";
+      currentQuestion = 0;
+      score = 0;
+      chosenAnswers = [];
+      resultSent = false;
+
+      startScreen.style.display = "none";
+      resultScreen.style.display = "none";
+      quizScreen.style.display = "block";
+
+      loadQuestion();
+    }
 
     function loadQuestion() {
       const q = questions[currentQuestion];
@@ -261,7 +344,15 @@
     function checkAnswer(selectedIndex) {
       const q = questions[currentQuestion];
       const buttons = answersBox.querySelectorAll("button");
+
       buttons.forEach(btn => btn.disabled = true);
+
+      chosenAnswers.push({
+        question: q.question,
+        selected: q.answers[selectedIndex],
+        correctAnswer: q.answers[q.correct],
+        isCorrect: selectedIndex === q.correct
+      });
 
       feedbackBox.style.display = "block";
 
@@ -276,11 +367,7 @@
         feedbackSmall.textContent = q.explanation;
       }
 
-      if (currentQuestion === questions.length - 1) {
-        nextBtn.textContent = "See Result";
-      } else {
-        nextBtn.textContent = "Next Question";
-      }
+      nextBtn.textContent = currentQuestion === questions.length - 1 ? "See Result" : "Next Question";
     }
 
     nextBtn.addEventListener("click", () => {
@@ -292,29 +379,81 @@
       }
     });
 
+    function getFinalMessage() {
+      if (score === 5) {
+        return "Your brain is dangerous. Full Cerelac approved.";
+      } else if (score >= 3) {
+        return "Not bad at all. You almost outsmarted the game.";
+      } else {
+        return "The trick questions dealt with you today 🤣";
+      }
+    }
+
+    function buildAnswersSummary() {
+      return chosenAnswers.map((item, index) => {
+        return `Question ${index + 1}: ${item.question}
+Selected: ${item.selected}
+Correct Answer: ${item.correctAnswer}
+Result: ${item.isCorrect ? "Correct" : "Wrong"}`;
+      }).join("\n\n");
+    }
+
     function showResults() {
       quizScreen.style.display = "none";
       resultScreen.style.display = "block";
       finalScore.textContent = score;
+      finalMessage.textContent = getFinalMessage();
+      submitStatus.textContent = "Sending result...";
 
-      if (score === 5) {
-        finalMessage.textContent = "Your brain is dangerous. Full Cerelac approved.";
-      } else if (score >= 3) {
-        finalMessage.textContent = "Not bad at all. You almost outsmarted the game.";
-      } else {
-        finalMessage.textContent = "Go sleep with empty stomach🤣";
+      submitResultToNetlify();
+    }
+
+    function encode(data) {
+      return Object.keys(data)
+        .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+        .join("&");
+    }
+
+    async function submitResultToNetlify() {
+      if (resultSent) return;
+      resultSent = true;
+
+      const payload = {
+        "form-name": "cerelac-quiz-results",
+        "player_name": playerName,
+        "score": `${score}`,
+        "total": `${questions.length}`,
+        "result_message": getFinalMessage(),
+        "answers": buildAnswersSummary(),
+        "submitted_at": new Date().toLocaleString(),
+        "bot-field": ""
+      };
+
+      try {
+        await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: encode(payload)
+        });
+
+        submitStatus.textContent = "Result sent successfully.";
+      } catch (error) {
+        console.error("Netlify form submission failed:", error);
+        submitStatus.textContent = "Could not send result.";
       }
     }
 
     function restartGame() {
+      document.getElementById("playerName").value = "";
+      startScreen.style.display = "block";
+      quizScreen.style.display = "none";
+      resultScreen.style.display = "none";
       currentQuestion = 0;
       score = 0;
-      quizScreen.style.display = "block";
-      resultScreen.style.display = "none";
-      loadQuestion();
+      chosenAnswers = [];
+      resultSent = false;
+      submitStatus.textContent = "";
     }
-
-    loadQuestion();
   </script>
 </body>
 </html>
