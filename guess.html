@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess It Game 🎮</title>
+
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:#f4f7f4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  margin:0;
+}
+
+.game-box{
+  background:#fff;
+  padding:30px;
+  border-radius:20px;
+  width:90%;
+  max-width:420px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  text-align:center;
+}
+
+h1{
+  color:#14532d;
+}
+
+.counter{
+  font-size:14px;
+  color:#6b7280;
+  margin-bottom:10px;
+}
+
+.question{
+  font-size:18px;
+  margin:20px 0;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  margin-bottom:15px;
+}
+
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:999px;
+  background:#14532d;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result{
+  margin-top:15px;
+  font-weight:bold;
+}
+
+.score{
+  margin-top:15px;
+  font-size:14px;
+  color:#555;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game-box">
+  <h1>Guess The Answer 🤔</h1>
+
+  <div class="counter" id="counter"></div>
+  <div class="question" id="question"></div>
+
+  <input type="text" id="answerInput" placeholder="Type your answer...">
+
+  <button onclick="submitAnswer()">Submit</button>
+
+  <div class="result" id="result"></div>
+  <div class="score" id="score"></div>
+</div>
+
+<script>
+
+const questions = [
+  {q:"What has keys but can't open locks?", a:"piano"},
+  {q:"What runs but never walks?", a:"water"},
+  {q:"I speak without a mouth, what am I?", a:"echo"},
+  {q:"What gets wetter the more it dries?", a:"towel"},
+  {q:"What has a heart but no other organs?", a:"cards"},
+  {q:"What comes once in a minute, twice in a moment?", a:"m"},
+  {q:"What has one eye but can't see?", a:"needle"},
+  {q:"What can travel around the world while staying in one place?", a:"stamp"},
+  {q:"What has a neck but no head?", a:"bottle"},
+  {q:"What goes up but never comes down?", a:"age"}
+];
+
+let current = 0;
+let score = 0;
+
+function loadQuestion(){
+  document.getElementById("counter").innerText = 
+    `Question ${current + 1} / ${questions.length}`;
+
+  document.getElementById("question").innerText = questions[current].q;
+  document.getElementById("answerInput").value = "";
+  document.getElementById("result").innerText = "";
+}
+
+function submitAnswer(){
+  const input = document.getElementById("answerInput").value.toLowerCase().trim();
+  const correct = questions[current].a;
+
+  if(input === correct){
+    score++;
+    document.getElementById("result").innerText = "Correct 😎🔥";
+  }else{
+    document.getElementById("result").innerText = 
+      "Wrong 😂❌ Correct answer: " + correct;
+  }
+
+  current++;
+
+  document.getElementById("score").innerText = 
+    "Score: " + score + "/" + questions.length;
+
+  if(current < questions.length){
+    setTimeout(loadQuestion, 1500);
+  }else{
+    setTimeout(showFinal, 1500);
+  }
+}
+
+function showFinal(){
+  document.querySelector(".game-box").innerHTML = `
+    <h1>Game Over 🎉</h1>
+    <p>You scored ${score}/10</p>
+    <p style="font-size:18px;font-weight:bold;">
+      ${score > 6 
+        ? "Well done 👏🔥" 
+        : "Successfully failed 😂😂"}
+    </p>
+  `;
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>

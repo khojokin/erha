@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>One Honest Game 💌</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:linear-gradient(135deg,#fff7ed,#ffe4e6);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      color:#222;
+    }
+
+    .game-wrap{
+      width:100%;
+      max-width:520px;
+      background:#fff;
+      border-radius:24px;
+      padding:28px;
+      box-shadow:0 18px 45px rgba(0,0,0,0.12);
+    }
+
+    .top-badge{
+      display:inline-block;
+      background:#fef3c7;
+      color:#92400e;
+      font-size:12px;
+      font-weight:700;
+      padding:7px 12px;
+      border-radius:999px;
+      margin-bottom:16px;
+    }
+
+    h1{
+      font-size:30px;
+      margin-bottom:10px;
+      color:#be123c;
+    }
+
+    .subtitle{
+      color:#666;
+      font-size:15px;
+      margin-bottom:22px;
+      line-height:1.5;
+    }
+
+    .counter{
+      font-size:13px;
+      font-weight:700;
+      color:#9f1239;
+      margin-bottom:14px;
+    }
+
+    .question{
+      font-size:22px;
+      font-weight:700;
+      line-height:1.35;
+      margin-bottom:18px;
+      color:#1f2937;
+    }
+
+    .options{
+      display:grid;
+      gap:12px;
+    }
+
+    .option-btn{
+      width:100%;
+      border:none;
+      background:#f9fafb;
+      border:1px solid #e5e7eb;
+      padding:16px;
+      border-radius:18px;
+      text-align:left;
+      font-size:15px;
+      cursor:pointer;
+      transition:0.25s;
+      color:#1f2937;
+      font-weight:600;
+    }
+
+    .option-btn:hover{
+      background:#fff1f2;
+      border-color:#fda4af;
+      transform:translateY(-1px);
+    }
+
+    .progress{
+      margin-top:22px;
+      height:10px;
+      background:#f3f4f6;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#fb7185,#e11d48);
+      transition:0.35s;
+      border-radius:999px;
+    }
+
+    .result-box{
+      text-align:center;
+      padding:12px 4px 0;
+    }
+
+    .result-box h2{
+      font-size:28px;
+      margin-bottom:12px;
+      color:#be123c;
+    }
+
+    .result-box p{
+      font-size:16px;
+      line-height:1.65;
+      color:#4b5563;
+      margin-bottom:14px;
+    }
+
+    .final-card{
+      background:#fff1f2;
+      border:1px solid #fecdd3;
+      border-radius:20px;
+      padding:18px;
+      margin:18px 0;
+      text-align:left;
+    }
+
+    .final-card strong{
+      display:block;
+      color:#9f1239;
+      margin-bottom:8px;
+      font-size:15px;
+    }
+
+    .tiny{
+      font-size:13px;
+      color:#6b7280;
+      margin-top:8px;
+    }
+
+    .locked{
+      text-align:center;
+      padding:16px 8px;
+    }
+
+    .locked h2{
+      font-size:26px;
+      color:#991b1b;
+      margin-bottom:10px;
+    }
+
+    .locked p{
+      color:#555;
+      line-height:1.6;
+    }
+
+    .btn-row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-top:18px;
+    }
+
+    .small-btn{
+      border:none;
+      padding:12px 18px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
+    }
+
+    .primary{
+      background:#e11d48;
+      color:#fff;
+    }
+
+    .secondary{
+      background:#f3f4f6;
+      color:#111827;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-wrap" id="app"></div>
+
+  <script>
+    const STORAGE_KEY = "one_honest_game_submitted_v1";
+
+    const questions = [
+      {
+        question: "1. When you think about him, what feels most true?",
+        options: [
+          { text: "He’s just someone I know", score: 0 },
+          { text: "He crosses my mind more than I admit", score: 2 },
+          { text: "He annoys me... but in a suspicious way", score: 3 },
+          { text: "I definitely think about him a lot", score: 4 }
+        ]
+      },
+      {
+        question: "2. If he suddenly stopped texting, what would you feel?",
+        options: [
+          { text: "Nothing much", score: 0 },
+          { text: "I’d notice after a while", score: 2 },
+          { text: "I’d pretend not to care, but I would", score: 3 },
+          { text: "I’d be genuinely bothered", score: 4 }
+        ]
+      },
+      {
+        question: "3. Which of these sounds most like you?",
+        options: [
+          { text: "I keep things casual", score: 0 },
+          { text: "I hide my feelings when they matter", score: 3 },
+          { text: "I joke instead of saying what I feel", score: 4 },
+          { text: "I know what I feel, I just don’t say it easily", score: 4 }
+        ]
+      },
+      {
+        question: "4. If he complimented you sincerely, your first reaction would be:",
+        options: [
+          { text: "Just say thanks", score: 1 },
+          { text: "Smile and act normal", score: 2 },
+          { text: "Act tough and then think about it later", score: 3 },
+          { text: "Lowkey melt but hide it", score: 4 }
+        ]
+      },
+      {
+        question: "5. What kind of message would secretly make your day?",
+        options: [
+          { text: "A random meme", score: 1 },
+          { text: "A thoughtful check-in", score: 2 },
+          { text: "A message saying he misses me", score: 4 },
+          { text: "A message saying he likes me", score: 5 }
+        ]
+      },
+      {
+        question: "6. Be honest: why is this game getting uncomfortable?",
+        options: [
+          { text: "It isn’t", score: 0 },
+          { text: "Because it’s too direct", score: 2 },
+          { text: "Because it’s lowkey exposing me", score: 4 },
+          { text: "Because I know where this is going", score: 5 }
+        ]
+      },
+      {
+        question: "7. If you had to choose one line that feels closest to the truth:",
+        options: [
+          { text: "He’s cool, that’s all", score: 0 },
+          { text: "Maybe I care a little", score: 2 },
+          { text: "I probably like him more than I say", score: 4 },
+          { text: "Fine... I like him", score: 6 }
+        ]
+      },
+      {
+        question: "8. What do you usually do when you actually like someone?",
+        options: [
+          { text: "Nothing, I keep quiet", score: 2 },
+          { text: "Tease them instead", score: 4 },
+          { text: "Avoid being too obvious", score: 3 },
+          { text: "Hope they figure it out first", score: 5 }
+        ]
+      },
+      {
+        question: "9. If this game ended with one honest sentence, which would be hardest to deny?",
+        options: [
+          { text: "He’s just there", score: 0 },
+          { text: "He matters to me", score: 3 },
+          { text: "I care about him a lot", score: 4 },
+          { text: "I like him, I’m just stubborn", score: 6 }
+        ]
+      },
+      {
+        question: "10. Final question: what is the most accurate ending?",
+        options: [
+          { text: "This game is wrong", score: 0 },
+          { text: "This game is a little right", score: 2 },
+          { text: "This game is annoyingly right", score: 5 },
+          { text: "Okay yes... I like him", score: 7 }
+        ]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let totalScore = 0;
+    let chosenAnswers = [];
+
+    const app = document.getElementById("app");
+
+    function renderLockedScreen() {
+      app.innerHTML = `
+        <div class="locked">
+          <div class="top-badge">Submitted Already</div>
+          <h2>One shot only 😌</h2>
+          <p>This game has already been completed on this device/browser.</p>
+          <p class="tiny">If you want true one-time play for everyone and private results sent to you automatically, that needs a backend or email service.</p>
+        </div>
+      `;
+    }
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const progressPercent = ((currentQuestion) / questions.length) * 100;
+
+      app.innerHTML = `
+        <div class="top-badge">Honesty Test 💌</div>
+        <h1>One Honest Game</h1>
+        <p class="subtitle">Answer honestly. No overthinking. No escape route 😏</p>
+        <div class="counter">Question ${currentQuestion + 1} of ${questions.length}</div>
+        <div class="question">${q.question}</div>
+        <div class="options">
+          ${q.options.map((option, index) => `
+            <button class="option-btn" onclick="selectAnswer(${index})">${option.text}</button>
+          `).join("")}
+        </div>
+        <div class="progress">
+          <div class="progress-bar" style="width:${progressPercent}%"></div>
+        </div>
+      `;
+    }
+
+    function buildResult(score) {
+      if (score <= 10) {
+        return {
+          title: "Verdict: suspiciously calm 👀",
+          summary: "The answers say she’s holding back hard... or she really came to play defense.",
+          confession: "Final read: feelings not clearly admitted."
+        };
+      } else if (score <= 22) {
+        return {
+          title: "Verdict: there’s definitely something there 😏",
+          summary: "She may not want to say it directly, but the answers show care, interest, and emotional softness.",
+          confession: "Final read: she likes you a little more than she wants to admit."
+        };
+      } else if (score <= 34) {
+        return {
+          title: "Verdict: exposed respectfully 💘",
+          summary: "These answers are giving strong emotional attachment, soft denial, and obvious hidden feelings.",
+          confession: "Final read: she likes you and has probably been trying not to make it too obvious."
+        };
+      } else {
+        return {
+          title: "Verdict: case closed 😂❤️",
+          summary: "This was not subtle at all. The pattern is clear, the evidence is loud, and the defense has collapsed.",
+          confession: "Final read: yes — she likes you."
+        };
+      }
+    }
+
+    function renderFinal() {
+      const result = buildResult(totalScore);
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        submitted: true,
+        score: totalScore,
+        answers: chosenAnswers,
+        submittedAt: new Date().toISOString()
+      }));
+
+      app.innerHTML = `
+        <div class="result-box">
+          <div class="top-badge">Submitted Successfully</div>
+          <h2>${result.title}</h2>
+          <p>${result.summary}</p>
+
+          <div class="final-card">
+            <strong>Final answer</strong>
+            <div>${result.confession}</div>
+          </div>
+
+          <p><strong>Score:</strong> ${totalScore}</p>
+          <p class="tiny">This game is now locked on this browser.</p>
+
+          <div class="btn-row">
+            <button class="small-btn primary" onclick="copyResult()">Copy Result</button>
+            <button class="small-btn secondary" onclick="shareResult()">Share</button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.selectAnswer = function(index) {
+      const picked = questions[currentQuestion].options[index];
+      totalScore += picked.score;
+      chosenAnswers.push({
+        question: questions[currentQuestion].question,
+        answer: picked.text,
+        score: picked.score
+      });
+
+      currentQuestion++;
+
+      if (currentQuestion >= questions.length) {
+        renderFinal();
+      } else {
+        renderQuestion();
+      }
+    };
+
+    window.copyResult = async function() {
+      const result = buildResult(totalScore);
+      const text = `One Honest Game Result\nScore: ${totalScore}\n${result.confession}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Result copied.");
+      } catch (e) {
+        alert("Could not copy result.");
+      }
+    };
+
+    window.shareResult = async function() {
+      const result = buildResult(totalScore);
+      const text = `One Honest Game Result — Score: ${totalScore}. ${result.confession}`;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "One Honest Game Result",
+            text
+          });
+        } catch (e) {}
+      } else {
+        alert("Sharing is not supported on this device.");
+      }
+    };
+
+    const existing = localStorage.getItem(STORAGE_KEY);
+    if (existing) {
+      renderLockedScreen();
+    } else {
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>
